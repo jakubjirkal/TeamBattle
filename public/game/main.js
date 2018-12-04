@@ -1,5 +1,6 @@
 let battleField = undefined;
 let me = undefined;
+let otherPlayers = undefined;
 
 const socket = io();
 
@@ -15,6 +16,10 @@ let moves = {
 function setup() {
     createCanvas(dimension+200, dimension);
 
+    const name = prompt('Select your name');
+    const team = Number(prompt('Select your team (1-2)'));
+
+    processNameAndTeam(name, team);
 }
 
 function draw() {
@@ -24,6 +29,9 @@ function draw() {
     drawTitle();
     if(battleField !== undefined) drawBattleField();
     if(me !== undefined) drawPlayer(me);
+    if(otherPlayers !== undefined){
+        for(let i = 0; i < otherPlayers.length; i++) drawPlayer(otherPlayers[i]);
+    }
 
     checkKeys();
 }
@@ -106,14 +114,20 @@ function drawBattleField(){
 
 function drawPlayer(player){
     if(player.team === 1) fill(color(255,0,0));
-    else fill(color(0,0,128));
+    else fill(color(0,255,255));
 
     ellipse(player.x, player.y, 20);
+    textSize(14);
+    text(player.name, player.x+5, player.y-12);
 }
 
 //SOCKET STUFF
 function processKeyPress(dirs){
     socket.emit('mouseProcess', dirs);
+}
+
+function processNameAndTeam(name, team){
+    socket.emit('processNameAndTeam', {name, team});
 }
 
 socket.on('battleField', (data) => {
@@ -122,4 +136,8 @@ socket.on('battleField', (data) => {
 
 socket.on('me', (data) => {
    me = data;
+});
+
+socket.on('otherPlayers', (data) => {
+    otherPlayers = data;
 });

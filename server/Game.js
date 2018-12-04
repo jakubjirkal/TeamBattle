@@ -26,7 +26,7 @@ class Game{
             this.id++;
             this.SOCKET_LIST[socket.id] = socket;
             console.log('Socket connection with id: ' + socket.id);
-            this.setNewPlayer(1, socket.id);
+
             socket.emit('battleField', this.battleField);
 
             socket.on('mouseProcess', (data) => {
@@ -34,7 +34,13 @@ class Game{
             });
 
             socket.on('disconnect', () => {
+                delete this.PLAYER_LIST[socket.id];
+                delete this.SOCKET_LIST[socket.id];
                 console.log('Socket dissconnected with id: ' + socket.id);
+            });
+
+            socket.on('processNameAndTeam', (data) => {
+                this.setNewPlayer(data.team, socket.id, data.name);
             });
         });
 
@@ -44,19 +50,31 @@ class Game{
                 const player = this.PLAYER_LIST[pi];
                 const socket = this.SOCKET_LIST[player.id];
 
+                //my info
                 socket.emit('me', player);
+
+                //other players
+                let otherPlayers = [];
+                for(let pi2 in this.PLAYER_LIST){
+                    if(pi === pi2) continue;
+                    const player2 = this.PLAYER_LIST[pi2];
+
+                    otherPlayers.push(player2);
+                }
+                socket.emit('otherPlayers', otherPlayers);
             }
         }, 1000/60);
     }
 
-    setNewPlayer(team, id){
+    setNewPlayer(team, id, name){
         const player = {
             team,
             id,
             hp: 100,
             ammo: 10,
             x: 400,
-            y: team === 1 ? 100 : 700
+            y: team === 1 ? 100 : 700,
+            name
         };
 
         this.PLAYER_LIST[id] = player;
