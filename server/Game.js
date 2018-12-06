@@ -35,7 +35,7 @@ class Game {
       });
 
       socket.on("triggerShot", data => {
-        this.setShot(data.x, data.y, this.PLAYER_LIST[socket.id]);
+        this.setShot(data.x, data.y, this.PLAYER_LIST[socket.id], socket.id);
       });
 
       socket.on("disconnect", () => {
@@ -81,15 +81,16 @@ class Game {
       ammo: 10,
       x: 400,
       y: team === 1 ? 100 : 700,
-      name
+      name,
+      points: 0
     };
 
     this.PLAYER_LIST[id] = player;
   }
 
   movePlayer(id, dirs) {
-    const newX = this.PLAYER_LIST[id].x + dirs.x;
-    const newY = this.PLAYER_LIST[id].y + dirs.y;
+    const newX = this.PLAYER_LIST[id].x + dirs.x * 1.5;
+    const newY = this.PLAYER_LIST[id].y + dirs.y * 1.5;
 
     let possible = true;
 
@@ -114,7 +115,9 @@ class Game {
     }
   }
 
-  setShot(x, y, player) {
+  setShot(x, y, player, id) {
+    if (this.PLAYER_LIST[id].ammo === 0) return;
+    this.PLAYER_LIST[id].ammo -= 1;
     const angle = Math.atan2(x - player.x, y - player.y);
     const xSpeed = Math.sin(angle);
     const ySpeed = Math.cos(angle);
@@ -124,7 +127,8 @@ class Game {
       ySpeed,
       x: player.x,
       y: player.y,
-      team: player.team
+      team: player.team,
+      id
     });
   }
 
@@ -164,7 +168,7 @@ class Game {
 
         if (dist <= 12) {
           clear = false;
-          this.processHit(pi);
+          this.processHit(pi, bullet.id);
           break;
         }
       }
@@ -174,8 +178,16 @@ class Game {
     this.bullets = newBullets;
   }
 
-  processHit(pi) {
-    console.log(this.PLAYER_LIST[pi]);
+  processHit(pi, id) {
+    this.PLAYER_LIST[pi].hp -= 10;
+    this.PLAYER_LIST[pi].points -= 1;
+    this.PLAYER_LIST[id].points += 2;
+
+    if (this.PLAYER_LIST[pi].hp <= 0) {
+      this.PLAYER_LIST[pi].hp = 100;
+      this.PLAYER_LIST[pi].ammo = 10;
+      this.PLAYER_LIST[pi].points -= 20;
+    }
   }
 }
 

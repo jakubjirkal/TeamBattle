@@ -28,6 +28,8 @@ function draw() {
 
   drawEdges();
   drawTitle();
+  if (otherPlayers !== undefined && me !== undefined) drawTeamStats();
+  if (me !== undefined) drawMyStats();
   if (battleField !== undefined) drawBattleField();
   if (me !== undefined) drawPlayer(me);
   if (otherPlayers !== undefined) {
@@ -123,6 +125,90 @@ function drawTitle() {
   fill(255);
   textSize(32);
   text(field, dimension + 15, 32);
+}
+
+function drawTeamStats() {
+  let redTeam = [];
+  let redPoints = 0;
+  for (let i = 0; i < otherPlayers.length; i++) {
+    if (otherPlayers[i].team === 1) {
+      redTeam.push(otherPlayers[i]);
+      redPoints += otherPlayers[i].points;
+    }
+  }
+  if (me.team === 1) {
+    redTeam.push(me);
+    redPoints += me.points;
+  }
+
+  let blueTeam = [];
+  let bluePoints = 0;
+  for (let i = 0; i < otherPlayers.length; i++) {
+    if (otherPlayers[i].team !== 1) {
+      blueTeam.push(otherPlayers[i]);
+      bluePoints += otherPlayers[i].points;
+    }
+  }
+  if (me.team !== 1) {
+    blueTeam.push(me);
+    bluePoints += me.points;
+  }
+
+  //team red
+  let title = "Team RED stats";
+  let points = redPoints;
+
+  fill(255);
+  textSize(20);
+  text(title, dimension + 15, 100);
+  textSize(18);
+  text("Points: " + points, dimension + 15, 122);
+
+  let y = 150;
+  for (var i = 0; i < redTeam.length; i++) {
+    const field =
+      redTeam[i].name + "  " + redTeam[i].hp + "hp  " + redTeam[i].points + "p";
+    textSize(16);
+    text(field, dimension + 15, y);
+    y += 20;
+  }
+
+  //team blue
+  title = "Team BLUE stats";
+  points = bluePoints;
+
+  fill(255);
+  textSize(20);
+  text(title, dimension + 15, 400);
+  textSize(18);
+  text("Points: " + points, dimension + 15, 422);
+
+  y = 450;
+  for (var i = 0; i < blueTeam.length; i++) {
+    const field =
+      blueTeam[i].name +
+      "  " +
+      blueTeam[i].hp +
+      "hp  " +
+      blueTeam[i].points +
+      "p";
+    textSize(16);
+    text(field, dimension + 15, y);
+    y += 20;
+  }
+}
+
+function drawMyStats() {
+  const title = "My stats";
+  const ammo = "Ammo: " + me.ammo;
+  const hp = "HP:      " + me.hp;
+
+  fill(255);
+  textSize(24);
+  text(title, dimension + 15, 735);
+  textSize(18);
+  text(ammo, dimension + 15, 765);
+  text(hp, dimension + 15, 785);
 }
 
 function drawBattleField() {
