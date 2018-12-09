@@ -2,6 +2,8 @@ let battleField = undefined;
 let me = undefined;
 let otherPlayers = undefined;
 let bullets = undefined;
+let ammo = undefined;
+let hp = undefined;
 
 const socket = io();
 
@@ -14,8 +16,14 @@ let moves = {
   right: false
 };
 
+let ammoIMG = undefined;
+let hpIMG = undefined;
+
 function setup() {
   createCanvas(dimension + 200, dimension);
+
+  ammoIMG = loadImage("/images/ammo.png");
+  hpIMG = loadImage("/images/hp.png");
 
   const name = prompt("Select your name");
   const team = Number(prompt("Select your team (1-2)"));
@@ -36,6 +44,8 @@ function draw() {
     for (let i = 0; i < otherPlayers.length; i++) drawPlayer(otherPlayers[i]);
   }
   if (bullets !== undefined) drawBullets();
+  if (ammo !== undefined) drawAmmo();
+  if (hp !== undefined) drawHP();
 
   checkKeys();
 }
@@ -235,6 +245,18 @@ function drawBullets() {
   }
 }
 
+function drawAmmo() {
+  for (let i = 0; i < ammo.length; i++) {
+    image(ammoIMG, ammo[i].x, ammo[i].y, ammo[i].size, ammo[i].size);
+  }
+}
+
+function drawHP() {
+  for (let i = 0; i < hp.length; i++) {
+    image(hpIMG, hp[i].x, hp[i].y, hp[i].size, hp[i].size);
+  }
+}
+
 //SOCKET STUFF
 function processKeyPress(dirs) {
   socket.emit("mouseProcess", dirs);
@@ -262,4 +284,12 @@ socket.on("otherPlayers", data => {
 
 socket.on("bullets", data => {
   bullets = data;
+});
+
+socket.on("ammo", data => {
+  ammo = data;
+});
+
+socket.on("hp", data => {
+  hp = data;
 });
